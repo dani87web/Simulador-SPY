@@ -1,0 +1,144 @@
+Quiero que generes el código completo (HTML, CSS y JavaScript) en un archivo único index.html para un simulador de compra/venta de un activo tipo SPY usando datos sintéticos (NO CSV). El código debe estar comentado en español, JS vanilla (sin frameworks), y solo puede usar Lightweight Charts de TradingView desde CDN para el gráfico.
+ARQUITECTURA / UI
+
+Un solo archivo index.html con HTML, CSS, JS embebidos.
+Tema oscuro, UI en español, USD, responsive (desktop+mobile).
+Atajos: B=Buy, S=Sell, A=Advance, N=Next, X=Sell All.
+Toasts/alertas minimalistas sin librerías externas.
+
+GRÁFICO
+
+Usar Lightweight Charts (CDN).
+Gráfico de velas a la derecha (ocupa mayor ancho).
+Ocultar fechas: sin eje temporal visible ni fechas en tooltips.
+El tooltip (custom si hace falta) muestra solo OHLC y opcionalmente el índice de vela.
+La serie debe usar time incremental (0,1,2…) o timestamps, pero no mostrar fechas.
+
+DATOS SINTÉTICOS (SPY SIMULADO)
+
+Sin CSV y sin red. Generar dataset sintético inicial (p.ej. 5.000 velas diarias).
+Modelo sugerido (documentado en comentarios):
+
+Random walk tipo GBM:
+S[t+1] = S[t] * exp((mu - 0.5*sigma^2)*dt + sigma*sqrt(dt)*Z)
+con dt=1/252, mu≈0.06 anual, sigma≈0.18 anual, Z~N(0,1).
+Gaps ocasionales (p≈0.03) entre close anterior y open.
+Construir OHLC:
+
+open = closePrev * (1 + gap)
+close = S[t]
+Rango intradiario: r = |N(0, 0.008)|.
+high = max(open, close) + r*close
+low  = min(open, close) - r*close
+Asegurar low ≤ min(open,close) y high ≥ max(open,close) y precios > 0.
+
+
+
+
+Mostrar claramente en la UI que los datos son ficticios.
+Agregar controles simples (opcional): Semilla, mu, sigma, Nuevo dataset.
+Guardar en localStorage la semilla/parámetros y el dataset actual.
+
+TRAMOS ALEATORIOS (ESCENARIOS 100 VELAS)
+
+Un escenario = 100 velas consecutivas tomadas aleatoriamente del dataset.
+Evitar índices fuera de rango; validar longitud.
+Guardar el tramo en estado y en localStorage.
+Advance avanza 1 vela; al final, desactivar hasta Next.
+Next:
+
+Cierra la posición al último precio visible si hay acciones.
+Toma nuevo tramo aleatorio (misma serie sintética).
+No reinicia capital: el equity persiste.
+
+
+Contadores: escenarios completados y mejor equity alcanzado.
+
+PANEL IZQUIERDO (CONTROLES Y MÉTRICAS)
+
+Botones: Comprar, Vender, Sell All, Advance, Next, Reset (limpia localStorage con confirmación).
+Input cantidad (entero).
+Métricas: Cash, Qty, Valor posición, % posición sobre equity, Ganancia % vs capital inicial.
+Capital inicial: USD 25,000.
+
+REGLAS DE TRADING
+
+Solo long (sin cortos).
+Ejecución al cierre de la vela actual visible.
+Sin fracciones (enteros). Comisiones=0, Slippage=0.
+Comprar(qty):
+
+Validar entero>0 y qty*precio ≤ cash.
+cash -= qty*precio, qty += qtyComprada.
+Costo promedio (ponderado):
+avgCost = (avgCost*qtyAnt + precio*qtyComprada)/(qtyAnt + qtyComprada).
+
+
+Vender(qty):
+
+Validar qty ≤ posición.
+Realizado realized += qtyVendida*(precio - avgCost).
+cash += qtyVendida*precio, qty -= qtyVendida.
+Si qty=0, avgCost=0/null.
+
+
+Mark-to-Market:
+
+unrealized = (qty>0) ? qty*(ultimoPrecio - avgCost) : 0.
+equity = cash + qty*ultimoPrecio.
+
+
+Rendimiento %:
+
+gainPct = ((equity - capitalInicial)/capitalInicial)*100.
+
+
+% posición:
+
+positionPct = (valorPosicion/equity)*100 (manejar equity=0).
+
+
+
+PERSISTENCIA (localStorage)
+
+Guardar/restaurar: capitalInicial, cash, qty, avgCost, realized, equity, escenariosCompletados, mejorEquity, índice de vela del escenario, tramo actual, dataset sintético y parámetros/semilla.
+En Next, actualizar contadores.
+Reset: limpiar estado con confirmación.
+
+UX / VALIDACIONES
+
+Layout claro: panel izquierdo (controles/métricas) + chart derecho (flex).
+Deshabilitar botones si: no hay datos, Advance al final, Sell/Sell All con qty=0.
+Validar: fondos insuficientes, cantidad inválida, no vender más de lo que se tiene.
+Toasts para errores y confirmaciones (Compra/Venta/Avance/Next).
+Atajos: B, S, X, A, N.
+Tras cada Advance, recalcular y actualizar todas las métricas y el gráfico.
+
+ESTADO Y FUNCIONES (con comentarios/docstrings en español)
+Implementar funciones:
+
+generateSyntheticData(total=5000, seed?, mu=0.06, sigma=0.18) → array de velas { time, open, high, low, close }.
+pickRandomSegment(data, length=100)
+renderChart(segment)
+advanceOneCandle()
+buy(qty), sell(qty), sellAll()
+updateMetrics()
+saveState(), loadState(), resetState()
+setupKeyboardShortcuts()
+showToast(message, type)
+
+PRUEBAS BÁSICAS (en comentarios o consola)
+
+Compra con fondos justos: cash baja, qty sube, avgCost recalcula.
+Venta parcial: realized = qtyVend*(precio-avgCost); actualiza cash/qty.
+Advance: actualiza equity y unrealized.
+Next: cierra posición y carga nuevo tramo; equity persiste.
+Persistencia: recarga mantiene estado si hay localStorage.
+Incluir fórmulas y casos borde: equity=0, qty=0.
+
+RESTRICCIONES
+
+Sin CSV, sin llamadas de red (evitar CORS).
+Sin librerías externas excepto Lightweight Charts.
+Código claro, modular, preparado para añadir activos/indicadores a futuro (hooks).
+Entregar archivo único y funcional, listo para abrir en el navegador.
