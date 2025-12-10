@@ -42,6 +42,9 @@ Genera datos **sintéticos** con un proceso **GBM (Geometric Brownian Motion)** 
 
 ---
 
+## Demo en vivo
+https://dani87web.github.io/Simulador-SPY/
+
 ## Uso rápido
 
 - **Buy (B)**: compra al **cierre** actual (cantidad entera).
