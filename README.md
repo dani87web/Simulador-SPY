@@ -60,8 +60,7 @@ Genera datos **sintéticos** con un proceso **GBM (Geometric Brownian Motion)** 
 
 ## Licencia
 
-Este proyecto se distribuye bajo licencia **MIT** (o la que prefieras).  
-Añadí un archivo `LICENSE` si corresponde.
+Este proyecto se distribuye bajo licencia **GNU General Public License v3.0**  
 
 ## Descargo de responsabilidad
 
