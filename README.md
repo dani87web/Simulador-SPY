@@ -2,6 +2,8 @@
 
 # Simulador SPY — Datos Sintéticos (Canvas)
 
+<img width="941" height="472" alt="simulatorspy" src="https://github.com/user-attachments/assets/445723b5-5010-4815-8242-50420f50dfb5" />
+
 Simulador **simple** de trading *long-only* para un activo tipo **SPY**.  
 Genera datos **sintéticos** con un proceso **GBM (Geometric Brownian Motion)** y los muestra en un **gráfico de velas** (Canvas puro, sin librerías).
 
@@ -67,5 +69,3 @@ Este proyecto se distribuye bajo licencia **GNU General Public License v3.0**
 Este simulador es **educativo** y **no** constituye asesoramiento financiero.  
 Los datos son **sintéticos** y no representan precios reales de mercado.
  
-
-<img width="941" height="472" alt="simulatorspy" src="https://github.com/user-attachments/assets/445723b5-5010-4815-8242-50420f50dfb5" />
